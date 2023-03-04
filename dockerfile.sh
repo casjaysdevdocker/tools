@@ -54,6 +54,7 @@ export OPEN_EDITOR="${OPEN_EDITOR:-yes}"
 CREATE_CMD="${CREATE_CMD:-gen-dockerfile}"
 DATE="$(date +'%Y%m%d%H%M')"
 SET_DIR="$PWD"
+exitCode=0
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ $# -eq 0 ]; then
   REPO_DIRS="$(ls -A "$DOCKER_GIT_DIR")"
@@ -75,10 +76,17 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
     DIR_NEW="$(realpath "$DOCKER_DEV_DIR/$d" 2>/dev/null)"
     DIR_OLD="$(realpath "$DOCKER_GIT_DIR/$d" 2>/dev/null)"
     if [ ! -d "$DIR_NEW" ]; then
-      backupapp --once "$d" "$DIR_OLD"
+      if [ -d "$DIR_OLD" ]; then
+        echo "Backing up $DIR_OLD to $DIR_OLD.$$"
+        backupapp --once "$d" "$DIR_OLD" &>/dev/null
+        __cp "$DIR_OLD" "$DIR_OLD.$$"
+      fi
       mkdir -p "$DIR_NEW" "$DIR_OLD"
       mkdir -p "$DIR_NEW/rootfs/usr/local/share/template-files/data"
       mkdir -p "$DIR_NEW/rootfs/usr/local/share/template-files/config"
+      gitignore "$DIR_NEW" dirignore,default --automated
+      eval $CREATE_CMD --nogit --dir "$DIR_NEW" --template $TEMPLATE
+      sCode=$?
       if [ -f "$DIR_OLD/Dockerfile" ] && [ -f "$DIR_NEW/Dockerfile.bak" ]; then
         echo "Moving Dockerfile to Docker.bak"
         __mv "$DIR_OLD/Dockerfile.bak" "$DIR_NEW/Dockerfile.$DATE.bak"
@@ -94,9 +102,6 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
         echo "Moving rootfs to rootfs.bak"
         __mv "$DIR_OLD/rootfs" "$DIR_NEW/rootfs.bak"
       fi
-      gitignore "$DIR_NEW" dirignore,default --automated
-      eval $CREATE_CMD --nogit --dir "$DIR_NEW" --template $TEMPLATE
-      sCode=$?
       if [ $sCode -eq 0 ]; then
         for otherDockerfile in "$DIR_OLD/Dockerfile"*; do
           if [ -f "$otherDockerfile" ]; then
@@ -117,7 +122,7 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
         fi
         if [ -d "$DIR_NEW/rootfs.bak/usr/local/share/template-files" ]; then
           echo "Moving template files"
-          __cp "$DIR_OLD/rootfs.bak/usr/local/share/template-files/." "$DIR_NEW/rootfs/usr/local/share/template-files/"
+          __cp "$DIR_NEW/rootfs.bak/usr/local/share/template-files/." "$DIR_NEW/rootfs/usr/local/share/template-files/"
         fi
         [ -f "$DIR_NEW/Dockerfile" ] || { echo "Failed to init $DIR_NEW" && exit 2; }
         [ -d "$DIR_OLD/.git" ] && echo "Moving the git directory" && __cp "$DIR_OLD/.git" "$DIR_NEW/.git"
@@ -126,8 +131,9 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
           code -nw "$DIR_NEW" && true && sleep 3 || false
           sCode="$?"
         fi
+        [ -d "$DIR_OLD" ] && __rmw "$DIR_OLD"
         if [ $sCode -eq 0 ] && [ "$RECREATE" != "no" ]; then
-          __rmw "$DIR_OLD" && mkdir -p "$DIR_OLD" && __cp "$DIR_NEW/." "$DIR_OLD/" && __rm "$DIR_NEW"
+          mkdir -p "$DIR_OLD" && __cp "$DIR_NEW/." "$DIR_OLD/" && __rm "$DIR_NEW"
           if [ "$OPEN_EDITOR" = "yes" ] && cd "$DIR_OLD" && [ -d "$DIR_OLD/.git" ]; then
             gitcommit "$DIR_OLD" all || exit 1
             gitcommit "$DIR_OLD" all || exit 1
@@ -135,13 +141,15 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
         fi
       else
         echo 'Something went wrong'
-        exit 1
+        exitCode=$((1 + exitCode))
       fi
       sleep 3
     else
       echo "The dir exists: $DIR_NEW"
     fi
+    printf '%\s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
   done
+  exit $exitCode
 elif [ "$CREATE_CMD" = "gen-dockermgr" ] || [ "$CREATE_CMD" = "mgr" ]; then
   DOCKER_GIT_DIR="$HOME/Projects/github/dockermgr"
   DOCKER_DEV_DIR="$HOME/.local/share/cdd/projects/dockermgr"
@@ -152,7 +160,10 @@ elif [ "$CREATE_CMD" = "gen-dockermgr" ] || [ "$CREATE_CMD" = "mgr" ]; then
     DIR_NEW="$(realpath "$DOCKER_DEV_DIR/$d" 2>/dev/null)"
     DIR_OLD="$(realpath "$DOCKER_GIT_DIR/$d" 2>/dev/null)"
     if [ ! -d "$DIR_NEW" ]; then
-      backupapp --once "$d" "$DIR_OLD"
+      if [ -d "$DIR_OLD" ]; then
+        backupapp --once "$d" "$DIR_OLD" &>/dev/null
+        __cp "$DIR_OLD" "$DIR_OLD.$$"
+      fi
       mkdir -p "$DIR_NEW" "$DIR_OLD" "$DIR_NEW/rootfs/data" "$DIR_NEW/rootfs/config"
       if [ -f "$DIR_OLD/install.sh" ] && [ -f "$DIR_OLD/install.sh.bak" ]; then
         echo "Moving install.sh to install.sh.bak"
@@ -189,20 +200,22 @@ elif [ "$CREATE_CMD" = "gen-dockermgr" ] || [ "$CREATE_CMD" = "mgr" ]; then
         code -nw "$DIR_NEW" && true && sleep 3 || false
         sCode="$?"
       fi
+      [ -d "$DIR_OLD" ] && __rmw "$DIR_OLD/"
       if [ $sCode -eq 0 ] && [ "$RECREATE" != "no" ]; then
-        __rmw "$DIR_OLD/" && __cp "$DIR_NEW/." "$DIR_OLD/" && __rm "$DIR_NEW"
+        __cp "$DIR_NEW/." "$DIR_OLD/" && __rm "$DIR_NEW"
         if [ "$OPEN_EDITOR" = "yes" ] && cd "$DIR_OLD" && [ -d "$DIR_OLD/.git" ]; then
           gitcommit "$DIR_OLD" all || exit 1
           gitcommit "$DIR_OLD" all || exit 1
         fi
       else
         echo 'Something went wrong'
-        exit 1
+        exitCode=$((1 + exitCode))
       fi
       sleep 3
     else
       echo "The dir exists: $DIR_NEW"
     fi
+    printf '%\s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
   done
 elif [ "$CREATE_CMD" = "gen-dockerboth" ] || [ "$CREATE_CMD" = "gen-dockerall" ]; then
   [ "$DOCKERFILE_RUN_BOTH" = "true" ] && exit 1
