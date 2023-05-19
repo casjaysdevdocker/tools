@@ -35,7 +35,7 @@ set -o pipefail
 __rm() { [ -e "$1" ] && rm -Rf "$1" 2>/dev/null || return 1; }
 __mv() { [ -e "$1" ] && mv -f "$1" "$2" 2>/dev/null || return 1; }
 __cp() { [ -e "$1" ] && cp -Rf "$1" "$2" 2>/dev/null || return 1; }
-__rmw() { [ -d "$1" ] && rm -Rf "${1:?}"/* 2>/dev/null || return 1; }
+__rmw() { [ -d "$1" ] && rm -Rf "${1:?directory no specified}"/* 2>/dev/null && __rm "$1" || return 1; }
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 while :; do
   case "$1" in
@@ -85,7 +85,7 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
       mkdir -p "$DIR_NEW/rootfs/usr/local/share/template-files/data"
       mkdir -p "$DIR_NEW/rootfs/usr/local/share/template-files/config"
       gitignore "$DIR_NEW" dirignore,default --automated
-      eval $CREATE_CMD --nogit --dir "$DIR_NEW" --template $TEMPLATE
+      eval $CREATE_CMD --nogit --dir "$DIR_NEW" --template $TEMPLATE &>/dev/null
       sCode=$?
       if [ -f "$DIR_OLD/Dockerfile" ] && [ -f "$DIR_NEW/Dockerfile.bak" ]; then
         echo "Moving Dockerfile to Docker.bak"
@@ -126,8 +126,8 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
         fi
         [ -f "$DIR_NEW/Dockerfile" ] || { echo "Failed to init $DIR_NEW" && exit 2; }
         [ -d "$DIR_OLD/.git" ] && echo "Moving the git directory" && __cp "$DIR_OLD/.git" "$DIR_NEW/.git"
-        builtin cd "$DIR_NEW" || exit 1
         if [ "$OPEN_EDITOR" = "yes" ] && [ $sCode -eq 0 ]; then
+          builtin cd "$DIR_NEW" || exit 1
           code -nw "$DIR_NEW" && true && sleep 3 || false
           sCode="$?"
         fi
@@ -147,7 +147,7 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
     else
       echo "The dir exists: $DIR_NEW"
     fi
-    printf '%s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+    printf '\n%s\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
   done
   exit $exitCode
 elif [ "$CREATE_CMD" = "gen-dockermgr" ] || [ "$CREATE_CMD" = "mgr" ]; then
@@ -215,7 +215,7 @@ elif [ "$CREATE_CMD" = "gen-dockermgr" ] || [ "$CREATE_CMD" = "mgr" ]; then
     else
       echo "The dir exists: $DIR_NEW"
     fi
-    printf '%s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+    printf '\n%s\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
   done
 elif [ "$CREATE_CMD" = "gen-dockerboth" ] || [ "$CREATE_CMD" = "gen-dockerall" ]; then
   [ "$DOCKERFILE_RUN_BOTH" = "true" ] && exit 1
