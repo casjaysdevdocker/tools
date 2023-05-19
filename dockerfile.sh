@@ -147,7 +147,7 @@ if [ "$CREATE_CMD" = "gen-dockerfile" ] || [ "$CREATE_CMD" = "file" ]; then
     else
       echo "The dir exists: $DIR_NEW"
     fi
-    printf '%\s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+    printf '%s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
   done
   exit $exitCode
 elif [ "$CREATE_CMD" = "gen-dockermgr" ] || [ "$CREATE_CMD" = "mgr" ]; then
@@ -215,7 +215,7 @@ elif [ "$CREATE_CMD" = "gen-dockermgr" ] || [ "$CREATE_CMD" = "mgr" ]; then
     else
       echo "The dir exists: $DIR_NEW"
     fi
-    printf '%\s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+    printf '%s\n\n' "# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
   done
 elif [ "$CREATE_CMD" = "gen-dockerboth" ] || [ "$CREATE_CMD" = "gen-dockerall" ]; then
   [ "$DOCKERFILE_RUN_BOTH" = "true" ] && exit 1
