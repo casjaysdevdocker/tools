@@ -26,10 +26,10 @@ docker run -t -i \
   -v /etc/localtime:/etc/localtime:ro \
   -v /var/lib/docker/storage/samba/data/:/var/lib/samba \
   -v /var/lib/docker/storage/samba/config/samba:/etc/samba/external \
-  --dns-search casjay.net \
+  --dns-search casjay.pro \
   --dns 10.0.0.250 \
   --dns 1.1.1.1 \
-  --add-host dc.casjay.net:10.0.0.250 \
+  --add-host dc.casjay.pro:10.0.0.250 \
   -h localdc \
   --name samba \
   --privileged \
