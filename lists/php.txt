@@ -1,0 +1,37 @@
+
+
+php packs="composer ${PHP_VERSION}-apache2 ${PHP_VERSION}-bcmath ${PHP_VERSION}-bz2 ${PHP_VERSION}-calendar ${PHP_VERSION}-cgi \
+  ${PHP_VERSION}-common ${PHP_VERSION}-ctype ${PHP_VERSION}-curl ${PHP_VERSION}-dba ${PHP_VERSION}-dev \
+  ${PHP_VERSION}-dom ${PHP_VERSION}-embed ${PHP_VERSION}-enchant ${PHP_VERSION}-exif ${PHP_VERSION}-ffi \
+  ${PHP_VERSION}-fileinfo ${PHP_VERSION}-fpm ${PHP_VERSION}-ftp ${PHP_VERSION}-gd ${PHP_VERSION}-gettext \
+  ${PHP_VERSION}-gmp ${PHP_VERSION}-iconv ${PHP_VERSION}-imap ${PHP_VERSION}-intl ${PHP_VERSION}-ldap \
+  ${PHP_VERSION}-litespeed ${PHP_VERSION}-mbstring ${PHP_VERSION}-mysqli ${PHP_VERSION}-mysqlnd ${PHP_VERSION}-odbc \
+  ${PHP_VERSION}-opcache ${PHP_VERSION}-openssl ${PHP_VERSION}-pcntl ${PHP_VERSION}-pdo ${PHP_VERSION}-pdo_dblib \
+  ${PHP_VERSION}-pdo_mysql ${PHP_VERSION}-pdo_odbc ${PHP_VERSION}-pdo_pgsql ${PHP_VERSION}-pdo_sqlite ${PHP_VERSION}-pear \
+  ${PHP_VERSION}-pgsql ${PHP_VERSION}-phar ${PHP_VERSION}-phpdbg ${PHP_VERSION}-posix ${PHP_VERSION}-pspell ${PHP_VERSION}-session \
+  ${PHP_VERSION}-shmop ${PHP_VERSION}-simplexml ${PHP_VERSION}-snmp ${PHP_VERSION}-soap ${PHP_VERSION}-sockets ${PHP_VERSION}-sodium \
+  ${PHP_VERSION}-sqlite3 ${PHP_VERSION}-sysvmsg ${PHP_VERSION}-sysvsem ${PHP_VERSION}-sysvshm ${PHP_VERSION}-tidy \
+  ${PHP_VERSION}-tokenizer ${PHP_VERSION}-xml ${PHP_VERSION}-xmlreader ${PHP_VERSION}-xmlwriter ${PHP_VERSION}-xsl \
+  ${PHP_VERSION}-zip ${PHP_VERSION}-pecl-memcached ${PHP_VERSION}-pecl-mongodb ${PHP_VERSION}-pecl-redis"
+
+  nginx="nginx"
+
+
+    mkdir -p "${WWW_ROOT_DIR}" "/etc/phpmyadmin" ; \
+  [ -e "/etc/my.cnf" ] && rm -Rf "/etc/my.cnf" || true; \
+  [ -e "/etc/postgres" ] && rm -Rf "/etc/postgres" || true; \
+  [ -e "/etc/my.cnf.d" ] && rm -Rf "/etc/my.cnf.d" || true; \
+  mkdir -p "/etc/nginx" "/etc/phppgadmin"; \
+  git clone -q --depth 1 "https://github.com/phppgadmin/phppgadmin" "${WWW_ROOT_DIR}}" ; \
+  unzip -q "/tmp/phpmyadmin.zip" -d "/tmp" && rm -Rf "/tmp/phpmyadmin.zip" ; \
+  cp -Rf "/tmp/phpMyAdmin-${PHPMYADMIN_VERSION}-all-languages/." "${WWW_ROOT_DIR}" ; \
+  git clone --depth 1 "https://github.com/phpmyadmin/themes" "/tmp/themes" ; \
+  rm -Rf "${WWW_ROOT_DIR}}/conf/config.inc.php"; \
+  cp -Rf "/usr/local/share/template-files/config/php/." "/etc/php/."; \
+  cp -Rf "/usr/local/share/template-files/config/nginx/." "/etc/nginx/."; \
+  cp -Rf "/usr/local/share/template-files/config/phppgadmin/." "/etc/phppgadmin/."; \
+  cp -Rf "/usr/local/share/template-files/config/phppgadmin/." "/etc/phppgadmin/."; \
+  ln -sf "/etc/phpmyadmin/config.php" "${WWW_ROOT_DIR}/config.inc.php"; \
+  chmod -f 777 "${WWW_ROOT_DIR}"; \
+  chown -Rf apache:apache "${WWW_ROOT_DIR}"; \
+  ln -sf "/etc/phppgadmin/config.php" "${WWW_ROOT_DIR}}/conf/config.inc.php; \

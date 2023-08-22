@@ -1,0 +1,1 @@
+transmission-daemon transmission-cli
