@@ -1,7 +1,5 @@
 __curl() { curl -q -LSsf --user "$root_user_name:$root_user_pass" "$@"; }
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __curl_users() { __curl -X PUT -H 'Accept: application/json' -H 'Content-Type: application/json' 'http://'$COUCHDB_SERVER':'$SERVICE_PORT'/_users/org.couchdb.user:'$1'' -d "{\"name\": \"$1\", \"password\": \"$2\", \"roles\": [], \"type\": \"user\"}" || return 2; }
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 __curl_database() { curl -q -LSsf -X PUT 'http://'$root_user_name:$root_user_pass'@'$COUCHDB_SERVER':'$SERVICE_PORT'/'$1'' || return 2; }
 
 SERVICE_PORT="5984"
