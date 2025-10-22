@@ -1,4 +1,4 @@
-# gitignore created on 10/15/22 at 13:39
+# gitignore created on 05/22/25 at 21:00
 # Disable reminder in prompt
 ignoredirmessage
 
@@ -20,7 +20,7 @@ ignoredirmessage
 
 ### macOS ###
 # General
-.DS_Store
+.DS_Store?
 .AppleDouble
 .LSOverride
 
@@ -70,17 +70,18 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+# misc
+!*/README*
+!inc/main.bash
+
 # Windows shortcuts
 *.lnk
-
-# Other
-**/.installed
 
 # ignore commit message
 **/.gitcommit
 
-#ignore .failed
-**/.build_failed
+# ignore .build_failed files
+**/.build_failed*
 
 # ignore .bak files
 **/*.bak
@@ -90,4 +91,27 @@ $RECYCLE.BIN/
 
 # ignore .no_git files
 **/.no_git
+
+# ignore .installed files
+**/.installed
+
+# ignore work in progress files
+**/*.rewrite.sh
+**/*.refactor.sh
+
+# ignore dotenv files
+.env
+
+# Ignore the file: app.env
+app.env
+
+# Ignore the file: compose.default.yaml
+compose.default.yaml
+# ignore the default dotenv file
+default.env
+# Exclude the rootfs dir
+rootfs
+
+# Exclude compose.yaml just in case it has sensitive data
+compose.yaml
 
