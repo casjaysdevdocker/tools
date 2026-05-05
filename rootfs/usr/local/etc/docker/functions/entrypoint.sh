@@ -113,11 +113,11 @@ __no_exit() {
   local failed_services=""
   local failure_count=0
 
-  [ -f "/run/no_exit.pid" ] && return 0
+  [ -f "/run/.no_exit.pid" ] && return 0
 
   exec bash -c "
-    trap 'echo \"Container shutdown requested\"; rm -f /run/no_exit.pid /run/*.pid; exit 0' TERM INT
-    echo \$\$ > /run/no_exit.pid
+    trap 'echo \"Container shutdown requested\"; rm -f /run/.no_exit.pid /run/*.pid; exit 0' TERM INT
+    echo \$\$ > /run/.no_exit.pid
 
     while true; do
       if [ -n \"$monitor_services\" ] && [ \"$monitor_services\" != \"tini\" ]; then
@@ -746,12 +746,12 @@ __start_init_scripts() {
   local exit_on_failure="${EXIT_ON_SERVICE_FAILURE:-true}"
 
   # Clean stale PID files from previous runs
-  if [ ! -f "/run/__start_init_scripts.pid" ]; then
+  if [ ! -f "/run/.start_init_scripts.pid" ]; then
     echo "🧹 Cleaning stale PID files from previous container run"
     rm -f /run/*.pid /run/init.d/*.pid 2>/dev/null || true
   fi
 
-  touch /run/__start_init_scripts.pid
+  touch /run/.start_init_scripts.pid
 
   if [ "$init_count" -eq 0 ] || [ ! -d "$init_dir" ]; then
     mkdir -p "/data/logs/init"
@@ -1286,7 +1286,7 @@ __backup() {
   test -n "$1" && test -z "${1//[0-9]/}" && cronTime="$1" && shift 1 || cronTime=""
   local exitCodeP=0
   local exitStatus=0
-  local pidFile="/run/backup.pid"
+  local pidFile="/run/.backup.pid"
   local logDir="/data/log/backups"
   maxDays="${BACKUP_MAX_DAYS:-$maxDays}"
   cronTime="${BACKUP_RUN_CRON:-$cronTime}"
@@ -1362,7 +1362,7 @@ export LIGHTTPD_CONFIG_FILE="${LIGHTTPD_CONFIG_FILE:-$(__find_lighttpd_conf)}"
 export MARIADB_CONFIG_FILE="${MARIADB_CONFIG_FILE:-$(__find_mysql_conf)}"
 export POSTGRES_CONFIG_FILE="${POSTGRES_CONFIG_FILE:-$(__find_pgsql_conf)}"
 export MONGODB_CONFIG_FILE="${MONGODB_CONFIG_FILE:-$(__find_mongodb_conf)}"
-export ENTRYPOINT_PID_FILE="${ENTRYPOINT_PID_FILE:-/run/init.d/entrypoint.pid}"
+export ENTRYPOINT_PID_FILE="${ENTRYPOINT_PID_FILE:-/run/.entrypoint.pid}"
 export ENTRYPOINT_INIT_FILE="${ENTRYPOINT_INIT_FILE:-/config/.entrypoint.done}"
 export ENTRYPOINT_DATA_INIT_FILE="${ENTRYPOINT_DATA_INIT_FILE:-/data/.docker_has_run}"
 export ENTRYPOINT_CONFIG_INIT_FILE="${ENTRYPOINT_CONFIG_INIT_FILE:-/config/.docker_has_run}"
