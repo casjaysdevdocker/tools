@@ -1,63 +1,79 @@
-## Docker Install guide
+## 👋 Welcome to tools 🚀  
 
-```bash
+tools README  
+  
+  
+## Install my system scripts  
 
-yum install -y yum-utils device-mapper-persistent-data lvm2
-yum install -y docker-ce
-systemctl enable docker --now
-
-base="https://git.casjay.in/docker/tools/raw/branch/master/usr/local/bin"
-for i in docker-compose docker-machine
-do
-  sudo wget "$base/${i}" -O /usr/local/bin/${i} && chmod -f +x "/usr/local/bin/$i"
-done
-
-base="https://git.casjay.in/docker/tools/raw/branch/master/etc/bash_completion.d"
-for i in docker-machine-prompt docker-machine-wrapper docker-machine docker-compose
-do
-  sudo wget "$base/${i}" -O "/etc/bash_completion.d/$i"
-done
-
-# Optional install portainer
-mkdir -p "/var/lib/docker/storage/portainer" && chmod -Rf 777 "/var/lib/docker/storage/portainer"
-docker run -d -p 127.0.0.1:9010:9000 \
---restart always \
---name portainer \
--v /var/run/docker.sock:/var/run/docker.sock \
--v /var/lib/docker/storage/portainer:/data \
-portainer/portainer
-
-# Optional install registry
-mkdir -p "/var/lib/docker/storage/registry" && chmod -Rf 777 "/var/lib/docker/storage/registry"
-docker run -d \
--p 5000:5000 \
---restart=always \
---name registry \
--v /var/lib/docker/storage/registry:/var/lib/registry \
--e SEARCH_BACKEND=sqlalchemy \
--v /etc/ssl/CA:/etc/ssl/CA \
--e REGISTRY_HTTP_TLS_CERTIFICATE=/etc/ssl/CA/certs/localhost.crt \
--e REGISTRY_HTTP_TLS_KEY=/etc/ssl/CA/private/localhost.key \
-registry
-
-# Optional install registry frontend
-mkdir -p "/var/lib/docker/storage/registry-web" && chmod -Rf 777 "/var/lib/docker/storage/registry-web"
-docker run --name registry-web \
--d --restart=always \
--e ENV_DOCKER_REGISTRY_HOST=registry.casjay.in \
--e ENV_DOCKER_REGISTRY_PORT=5000 \
--e ENV_REGISTRY_PROXY_FQDN=registry.casjay.in \
--e ENV_REGISTRY_PROXY_PORT=443 \
--e ENV_DEFAULT_REPOSITORIES_PER_PAGE=50 \
--e ENV_MODE_BROWSE_ONLY=false \
--e ENV_DEFAULT_TAGS_PER_PAGE=20 \
--e ENV_DOCKER_REGISTRY_USE_SSL=1 \
--e ENV_USE_SSL=1 \
--v /var/lib/docker/storage/registry-web:/var/lib/registry \
--v /etc/ssl/CA/certs/localhost.crt:/etc/apache2/server.crt:ro \
--v /etc/ssl/CA/private/localhost.key:/etc/apache2/server.key:ro \
--p 7080:80 \
--p 7081:443 \
-konradkleine/docker-registry-frontend:v2
-
+```shell
+ sudo bash -c "$(curl -q -LSsf "https://github.com/systemmgr/installer/raw/main/install.sh")"
+ sudo systemmgr --config && sudo systemmgr install scripts  
 ```
+  
+## Automatic install/update  
+  
+```shell
+dockermgr update tools
+```
+  
+## Install and run container
+  
+```shell
+dockerHome="/var/lib/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs"
+mkdir -p "/var/lib/srv/$USER/docker/tools/rootfs"
+git clone "https://github.com/dockermgr/tools" "$HOME/.local/share/CasjaysDev/dockermgr/tools"
+cp -Rfva "$HOME/.local/share/CasjaysDev/dockermgr/tools/rootfs/." "$dockerHome/"
+docker run -d \
+--restart always \
+--privileged \
+--name casjaysdevdocker-tools-latest \
+--hostname tools \
+-e TZ=${TIMEZONE:-America/New_York} \
+-v "$dockerHome/data:/data:z" \
+-v "$dockerHome/config:/config:z" \
+-p 80:80 \
+casjaysdevdocker/tools:latest
+```
+  
+## via docker-compose  
+  
+```yaml
+version: "2"
+services:
+  ProjectName:
+    image: casjaysdevdocker/tools
+    container_name: casjaysdevdocker-tools
+    environment:
+      - TZ=America/New_York
+      - HOSTNAME=tools
+    volumes:
+      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs/data:/data:z"
+      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs/config:/config:z"
+    ports:
+      - 80:80
+    restart: always
+```
+  
+## Get source files  
+  
+```shell
+dockermgr download src casjaysdevdocker/tools
+```
+  
+OR
+  
+```shell
+git clone "https://github.com/casjaysdevdocker/tools" "$HOME/Projects/github/casjaysdevdocker/tools"
+```
+  
+## Build container  
+  
+```shell
+cd "$HOME/Projects/github/casjaysdevdocker/tools"
+buildx 
+```
+  
+## Authors  
+  
+🤖 casjay: [Github](https://github.com/casjay) 🤖  
+⛵ casjaysdevdocker: [Github](https://github.com/casjaysdevdocker) [Docker](https://hub.docker.com/u/casjaysdevdocker) ⛵  
