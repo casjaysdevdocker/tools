@@ -19,8 +19,8 @@ dockermgr update tools
 ## Install and run container
   
 ```shell
-dockerHome="/var/lib/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs"
-mkdir -p "/var/lib/srv/$USER/docker/tools/rootfs"
+dockerHome="/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs"
+mkdir -p "/srv/$USER/docker/tools/rootfs"
 git clone "https://github.com/dockermgr/tools" "$HOME/.local/share/CasjaysDev/dockermgr/tools"
 cp -Rfva "$HOME/.local/share/CasjaysDev/dockermgr/tools/rootfs/." "$dockerHome/"
 docker run -d \
@@ -47,8 +47,8 @@ services:
       - TZ=America/New_York
       - HOSTNAME=tools
     volumes:
-      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs/data:/data:z"
-      - "/var/lib/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs/config:/config:z"
+      - "/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs/data:/data:z"
+      - "/srv/$USER/docker/casjaysdevdocker/tools/tools/latest/rootfs/config:/config:z"
     ports:
       - 80:80
     restart: always
